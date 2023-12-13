@@ -20,6 +20,7 @@ connectMongoDB()
     );
   })
   .catch((err) => {
+    clg
     console.error("Error: " + err.message);
   });
 
