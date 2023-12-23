@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 const productsCollection = require("../models/products");
 
 const handleGetProducts = async (req, res) => {
@@ -5,7 +6,7 @@ const handleGetProducts = async (req, res) => {
     // short by position field in ascending order
     const result = await productsCollection
       .find()
-      .sort({ position: 1 })
+      .sort({ createdAt: -1 })
       .toArray();
     res.send(result);
   } catch (err) {
@@ -30,7 +31,24 @@ const handlePostProducts = async (req, res) => {
   }
 };
 
+// update product
+const handleUpdateProduct = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const filter = { _id: new ObjectId(id) };
+    const updatedData = req.body;
+    const updateProduct = await productsCollection.updateOne(filter, {
+      $set: updatedData,
+    });
+    res.send(updateProduct);
+  } catch (err) {
+    console.error("Error updating products", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   handleGetProducts,
   handlePostProducts,
+  handleUpdateProduct,
 };
