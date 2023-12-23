@@ -3,6 +3,7 @@ const {
   handleGetProducts,
   handlePostProducts,
   handleUpdateProduct,
+  handleDeleteProduct,
 } = require("../controllers/products");
 const router = express.Router();
 
@@ -10,6 +11,6 @@ const router = express.Router();
 router.route("/").get(handleGetProducts).post(handlePostProducts);
 
 // update product
-router.patch("/:id", handleUpdateProduct);
+router.route("/:id").patch(handleUpdateProduct).delete(handleDeleteProduct);
 
 module.exports = router;

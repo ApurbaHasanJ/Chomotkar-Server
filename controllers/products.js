@@ -42,7 +42,19 @@ const handleUpdateProduct = async (req, res) => {
     });
     res.send(updateProduct);
   } catch (err) {
-    console.error("Error updating products", err);
+    console.error("Error updating product", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const handleDeleteProduct = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const filter = { _id: new ObjectId(id) };
+    const result = await productsCollection.deleteOne(filter);
+    res.send(result);
+  } catch (err) {
+    console.error("Error deleting product", err);
     res.status(500).json({ message: err.message });
   }
 };
@@ -51,4 +63,5 @@ module.exports = {
   handleGetProducts,
   handlePostProducts,
   handleUpdateProduct,
+  handleDeleteProduct
 };
