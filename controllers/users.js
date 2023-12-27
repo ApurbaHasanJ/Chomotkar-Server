@@ -1,3 +1,4 @@
+const { ObjectId, ReturnDocument } = require("mongodb");
 const usersCollection = require("../models/users");
 
 const handlePostUsers = async (req, res) => {
@@ -11,4 +12,24 @@ const handleGetUsers = async (req, res) => {
   res.send(result);
 };
 
-module.exports = { handlePostUsers, handleGetUsers };
+const handleUserRole = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const role = req.body.role;
+
+    const userFilter = { _id: new ObjectId(id) };
+
+    const updatedRole = {
+      $set: { role: role },
+    };
+
+    const result = await usersCollection.updateOne(userFilter, updatedRole);
+
+    res.send(result);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+module.exports = { handlePostUsers, handleGetUsers, handleUserRole };

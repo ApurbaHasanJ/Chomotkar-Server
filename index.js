@@ -22,6 +22,7 @@ const { connectMongoDB } = require("./connection");
 // routes
 const productsCollection = require("./routes/products");
 const usersCollection = require("./routes/users");
+const couponCollection = require("./routes/coupon");
 
 // Connecting to MongoDB using the connectMongoDB function from connection.js
 connectMongoDB()
@@ -33,6 +34,9 @@ connectMongoDB()
 
     // users collection
     app.use("/users", usersCollection);
+
+    // coupon collection
+    app.use("/coupons", couponCollection);
 
     client.db("admin").command({ ping: 1 });
     console.log(
