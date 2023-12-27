@@ -32,4 +32,16 @@ const handleUserRole = async (req, res) => {
   }
 };
 
-module.exports = { handlePostUsers, handleGetUsers, handleUserRole };
+const handleDeleteUser = async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const result = await usersCollection.deleteOne(filter);
+  res.send(result);
+};
+
+module.exports = {
+  handlePostUsers,
+  handleGetUsers,
+  handleUserRole,
+  handleDeleteUser,
+};

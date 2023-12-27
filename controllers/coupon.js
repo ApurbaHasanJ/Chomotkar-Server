@@ -1,3 +1,4 @@
+const { ObjectId } = require("mongodb");
 const couponsCollection = require("../models/coupon");
 
 const handlePostCouponCode = async (req, res) => {
@@ -11,7 +12,17 @@ const handleGetCouponCode = async (req, res) => {
   res.send(result);
 };
 
+const handleDeleteCouponCode = async (req, res) => {
+  const id = req.params.id;
+  console.log(id);
+  const filter = { _id: new ObjectId(id) };
+  console.log(filter);
+  const result = await couponsCollection.deleteOne(filter);
+  res.send(result);
+};
+
 module.exports = {
   handlePostCouponCode,
   handleGetCouponCode,
+  handleDeleteCouponCode,
 };
