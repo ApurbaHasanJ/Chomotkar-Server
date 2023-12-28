@@ -1,6 +1,7 @@
 // importing required modules and setting up Express
 const express = require("express");
 const cors = require("cors");
+
 // connect mongodb
 require("dotenv").config();
 const app = express();
@@ -20,6 +21,7 @@ app.use(express.json());
 const { connectMongoDB } = require("./connection");
 
 // routes
+const { authRouter } = require("./services/auth");
 const productsCollection = require("./routes/products");
 const usersCollection = require("./routes/users");
 const couponCollection = require("./routes/coupon");
@@ -28,6 +30,8 @@ const couponCollection = require("./routes/coupon");
 connectMongoDB()
   .then((client) => {
     // Routes setup
+    // Use the authentication router
+    app.use("/jwt", authRouter);
 
     // products collection
     app.use("/products", productsCollection);
