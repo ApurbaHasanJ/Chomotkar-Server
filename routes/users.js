@@ -4,15 +4,21 @@ const {
   handleGetUsers,
   handleUserRole,
   handleDeleteUser,
+  handleGetAdmin,
 } = require("../controllers/users");
-const { verifyJWT } = require("../services/auth");
+const { verifyJWT, verifyAdmin } = require("../services/auth");
 const router = express.Router();
 
-// Apply the verifyJWT middleware to all routes in this file
-router.use(verifyJWT);
+router.post("/", handlePostUsers);
 
-router.route("/").post(handlePostUsers).get(handleGetUsers);
+router.get("/", verifyJWT, handleGetUsers);
 
-router.route("/:id").patch(handleUserRole).delete(handleDeleteUser);
+// check admin
+router.get("/admin/:email", verifyJWT, handleGetAdmin);
+
+router
+  .route("/:id")
+  .patch(verifyJWT, verifyAdmin, handleUserRole)
+  .delete(verifyJWT, verifyAdmin, handleDeleteUser);
 
 module.exports = router;

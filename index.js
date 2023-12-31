@@ -2,9 +2,9 @@
 const express = require("express");
 const cors = require("cors");
 
-// connect mongodb
 require("dotenv").config();
 const app = express();
+
 const port = process.env.PORT || 5000;
 
 // middleware setup
@@ -20,11 +20,15 @@ app.use(express.json());
 // connect mongodb
 const { connectMongoDB } = require("./connection");
 
+// console.log(store_id, store_passwd);
+
 // routes
 const { authRouter } = require("./services/auth");
 const productsCollection = require("./routes/products");
 const usersCollection = require("./routes/users");
 const couponCollection = require("./routes/coupon");
+const reviewCollection = require("./routes/reviews");
+const orderAPI = require("./routes/payment");
 
 // Connecting to MongoDB using the connectMongoDB function from connection.js
 connectMongoDB()
@@ -32,6 +36,9 @@ connectMongoDB()
     // Routes setup
     // Use the authentication router
     app.use("/jwt", authRouter);
+
+    //  payment method
+    app.use("/order", orderAPI);
 
     // products collection
     app.use("/products", productsCollection);
@@ -41,6 +48,9 @@ connectMongoDB()
 
     // coupon collection
     app.use("/coupons", couponCollection);
+
+    // review collection
+    app.use("/reviews", reviewCollection);
 
     client.db("admin").command({ ping: 1 });
     console.log(
