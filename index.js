@@ -29,6 +29,7 @@ const usersCollection = require("./routes/users");
 const couponCollection = require("./routes/coupon");
 const reviewCollection = require("./routes/reviews");
 const orderAPI = require("./routes/payment");
+const ordersCollection= require("./routes/orders");
 
 // Connecting to MongoDB using the connectMongoDB function from connection.js
 connectMongoDB()
@@ -39,6 +40,9 @@ connectMongoDB()
 
     //  payment method
     app.use("/order", orderAPI);
+
+    // order management admin route
+    app.use("/orders", ordersCollection);
 
     // products collection
     app.use("/products", productsCollection);

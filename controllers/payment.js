@@ -1,5 +1,4 @@
 const express = require("express");
-const router = express.Router();
 
 // ssl commerz
 const SSLCommerzPayment = require("sslcommerz-lts");
@@ -7,6 +6,7 @@ const productsCollection = require("../models/products");
 const { ObjectId } = require("mongodb");
 const couponsCollection = require("../models/coupon");
 const orderCollection = require("../models/payment");
+const { DateTime } = require("luxon");
 
 // ssl support
 const store_id = process.env.STORE_ID;
@@ -24,7 +24,7 @@ const handlePostOrder = async (req, res) => {
   });
 
   // Coupon code
-  const couponCode = order?.couponCode || 0;
+  const couponCode = order?.couponCode || "";
 
   // Order quantity
   const quantity = order?.quantity;
@@ -113,6 +113,25 @@ const handlePostOrder = async (req, res) => {
     //   res.redirect(GatewayPageURL);
     res.send({ url: GatewayPageURL });
 
+    // Get the current date and time of the server
+    const currentServerDateTime = DateTime.utc();
+
+    // Set the locale to English
+    const enDateTime = currentServerDateTime.setLocale("en");
+
+    // Format the date and time in English language
+    const formattedEnDateTime = enDateTime.toLocaleString({
+      locale: "en",
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZone: "Asia/Dhaka", // You can adjust the timeZone as needed
+    });
+
     // take data for store in mongoDB
     const finalOrder = {
       productId: product?._id,
@@ -126,7 +145,7 @@ const handlePostOrder = async (req, res) => {
       couponCode: couponCode,
       quantity: quantity,
       totalAmount: totalAmount,
-      createdAt: new Date(),
+      createdAt: formattedEnDateTime,
     };
 
     const result = orderCollection.insertOne(finalOrder);
@@ -151,7 +170,7 @@ const handlePostSuccessOrder = async (req, res) => {
   }
 };
 
-const handlePostFailedOrder = async (req, res) => {
+const handleDeleteFailedOrder = async (req, res) => {
   tranId = req.params.tranId;
   const result = await orderCollection.deleteOne({ transactionId: tranId });
   if (result.deletedCount) {
@@ -162,5 +181,5 @@ const handlePostFailedOrder = async (req, res) => {
 module.exports = {
   handlePostOrder,
   handlePostSuccessOrder,
-  handlePostFailedOrder,
+  handleDeleteFailedOrder,
 };
