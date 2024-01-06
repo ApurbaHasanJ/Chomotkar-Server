@@ -1,5 +1,3 @@
-const express = require("express");
-
 // ssl commerz
 const SSLCommerzPayment = require("sslcommerz-lts");
 const productsCollection = require("../models/products");
@@ -16,7 +14,7 @@ const is_live = false; //true for live, false for sandbox
 // post order
 const handlePostOrder = async (req, res) => {
   const order = req.body;
-  console.log(order);
+  // console.log(order);
 
   // Finding product from the database
   const product = await productsCollection.findOne({
@@ -65,10 +63,10 @@ const handlePostOrder = async (req, res) => {
     totalAmount = discountedAmount + shippingCharge.outsideDhaka;
   }
 
-  console.log(product?._id);
+  // console.log(product?._id);
 
-  console.log("Subtotal:", subAmount);
-  console.log("Total Amount:", totalAmount);
+  // console.log("Subtotal:", subAmount);
+  // console.log("Total Amount:", totalAmount);
 
   // generate transaction id
   const tran_id = new ObjectId().toJSON();
@@ -105,7 +103,7 @@ const handlePostOrder = async (req, res) => {
     ship_country: "Bangladesh",
   };
 
-  console.log(data);
+  // console.log(data);
   const sslcz = new SSLCommerzPayment(store_id, store_passwd, is_live);
   sslcz.init(data).then((apiResponse) => {
     // Redirect the user to payment gateway
@@ -113,29 +111,30 @@ const handlePostOrder = async (req, res) => {
     //   res.redirect(GatewayPageURL);
     res.send({ url: GatewayPageURL });
 
-    // Get the current date and time of the server
-    const currentServerDateTime = DateTime.utc();
+    // // Get the current date and time of the server
+    // const currentServerDateTime = DateTime.utc();
 
-    // Set the locale to English
-    const enDateTime = currentServerDateTime.setLocale("en");
+    // // Set the locale to English
+    // const enDateTime = currentServerDateTime.setLocale("en");
 
-    // Format the date and time in English language
-    const formattedEnDateTime = enDateTime.toLocaleString({
-      locale: "en",
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "numeric",
-      second: "numeric",
-      timeZone: "Asia/Dhaka", // You can adjust the timeZone as needed
-    });
+    // // Format the date and time in English language
+    // const formattedEnDateTime = enDateTime.toLocaleString({
+    //   locale: "en",
+    //   weekday: "long",
+    //   month: "long",
+    //   day: "numeric",
+    //   year: "numeric",
+    //   hour: "numeric",
+    //   minute: "numeric",
+    //   second: "numeric",
+    //   timeZone: "Asia/Dhaka", // You can adjust the timeZone as needed
+    // });
 
     // take data for store in mongoDB
     const finalOrder = {
       productId: product?._id,
       paidStatus: false,
+      orderStatus: "pending",
       transactionId: tran_id,
       cusName: order?.name,
       cusPhone: order?.phone,
@@ -143,9 +142,12 @@ const handlePostOrder = async (req, res) => {
       cusAdd: order?.address,
       cusLocation: order?.location,
       couponCode: couponCode,
+      color: order?.color,
+      size: order?.size,
       quantity: quantity,
       totalAmount: totalAmount,
-      createdAt: formattedEnDateTime,
+      paymentMethod: order.payOnline ? "Online" : "COD",
+      createdAt: order?.date,
     };
 
     const result = orderCollection.insertOne(finalOrder);
