@@ -19,33 +19,25 @@ const handleOrderStatus = async (req, res) => {
   res.send(result);
 };
 
-const handleRejectOrder = async (req, res) => {
+const handleGetUserOrders = async (req, res) => {
   try {
-    const encodedDate = req.params.date;
-    const orderStatus = req.body.orderStatus;
-    const date = decodeURIComponent(encodedDate);
-    console.log("Received date:", date);
+    // const projection = { createdAt: 1, orderStatus: 1, paidStatus: 1 };
 
-    const query = { createdAt: date };
-    // console.log("query", query);
-    const newOrderStatus = {
-      $set: { orderStatus: orderStatus },
-    };
+    const orders = await orderCollection.find().toArray();
+    // console.log(orders);
 
-    const result = await orderCollection.updateOne(query, newOrderStatus);
-    console.log(result);
-
-    res.send(result);
+    res.send(orders)
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
 
+
 module.exports = {
   handleGetOrders,
   handleOrderStatus,
-  handleRejectOrder,
+  handleGetUserOrders,
 };
 
 
