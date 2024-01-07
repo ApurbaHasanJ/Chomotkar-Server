@@ -73,7 +73,7 @@ const handlePostOrder = async (req, res) => {
   //   console.log("tran id", tran_id);
 
   const data = {
-    total_amount: totalAmount,
+    total_amount: order?.totalAmount || totalAmount,
     currency: "BDT",
     tran_id: tran_id,
     success_url: `http://localhost:5000/order/payment/success/${tran_id}`,
@@ -142,6 +142,7 @@ const handlePostOrder = async (req, res) => {
       cusAdd: order?.address,
       cusLocation: order?.location,
       couponCode: couponCode,
+      orderNote: order?.orderNote || "",
       color: order?.color,
       size: order?.size,
       quantity: quantity,
