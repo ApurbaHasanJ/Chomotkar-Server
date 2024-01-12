@@ -1,9 +1,22 @@
 const { ObjectId, ReturnDocument } = require("mongodb");
 const usersCollection = require("../models/users");
 
-// post function
+// post user information
 const handlePostUsers = async (req, res) => {
   const user = req.body;
+
+  // console.log(user);
+
+  const query = { email: user.email };
+  const existingUser = await usersCollection.findOne(query);
+
+  if (existingUser) {
+    // User already exists, handle it here (e.g., update user information)
+    // console.log("User already exists:", existingUser);
+    return res.send({ message: "User already exists" });
+  }
+
+  // If the email doesn't exist, proceed to insert the new user
   const result = await usersCollection.insertOne(user);
   res.send(result);
 };
@@ -58,10 +71,23 @@ const handleGetAdmin = async (req, res) => {
   res.send(result);
 };
 
+const handleUpdateUserInfo = async (req, res) => {
+  const id = req.params.id;
+  console.log(id);
+  const updatedInfo = req.body; // Assuming the body contains the updated fields directly
+
+  const query = { _id: new ObjectId(id) };
+
+  const result = await usersCollection.updateOne(query, { $set: updatedInfo });
+  console.log(result);
+  res.send(result);
+};
+
 module.exports = {
   handlePostUsers,
   handleGetUsers,
   handleUserRole,
   handleDeleteUser,
   handleGetAdmin,
+  handleUpdateUserInfo,
 };

@@ -15,9 +15,9 @@ router
   .post(verifyJWT, verifyAdmin, handlePostProducts);
 
 // update product
-router
-  .route("/:id")
-  .patch(verifyJWT, verifyAdmin, handleUpdateProduct)
-  .delete(verifyJWT, verifyAdmin, handleDeleteProduct);
+router.route("/:id").patch(verifyJWT, verifyAdmin, handleUpdateProduct);
+// .delete(verifyJWT, verifyAdmin, handleDeleteProduct);
+
+router.delete("/", handleDeleteProduct, verifyAdmin, handleDeleteProduct);
 
 module.exports = router;
