@@ -26,14 +26,14 @@ connectMongoDB()
     const usersCollection = require("./routes/users");
     const couponCollection = require("./routes/coupon");
     const reviewCollection = require("./routes/reviews");
-    const orderAPI = require("./routes/payment");
+    const paymentApi = require("./routes/payment");
     const ordersCollection = require("./routes/orders");
 
     // Use the authentication router
     app.use("/jwt", authRouter);
 
     // Payment method
-    app.use("/order", orderAPI);
+    app.use("/", paymentApi);
 
     // Order management admin route
     app.use("/orders", ordersCollection);

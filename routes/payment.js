@@ -1,16 +1,14 @@
 const express = require("express");
 const {
   handlePostOrder,
-  handlePostSuccessOrder,
-  handleDeleteFailedOrder,
+  handlePaymentCallback,
+  handleRefundOrder,
 } = require("../controllers/payment");
-const { verifyJWT, verifyAdmin } = require("../services/auth");
+const { bkashAuth } = require("../middleware/middleware");
 const router = express.Router();
 
-router.post("/", handlePostOrder);
-
-router.post("/payment/success/:tranId", handlePostSuccessOrder);
-
-router.post("/payment/failed/:tranId", handleDeleteFailedOrder);
+router.post("/payment", bkashAuth, handlePostOrder);
+router.all("/bkash/payment/callback", bkashAuth, handlePaymentCallback);
+router.get("/bkash/payment/refund/:trxID", bkashAuth, handleRefundOrder);
 
 module.exports = router;

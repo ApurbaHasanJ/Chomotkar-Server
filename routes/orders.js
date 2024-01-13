@@ -1,7 +1,6 @@
 const express = require("express");
 const {
   handleGetOrders,
-  handleRejectOrder,
   handleOrderStatus,
   handleGetUserOrders,
 } = require("../controllers/orders");
