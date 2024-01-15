@@ -18,6 +18,6 @@ router
 router.route("/:id").patch(verifyJWT, verifyAdmin, handleUpdateProduct);
 // .delete(verifyJWT, verifyAdmin, handleDeleteProduct);
 
-router.delete("/", handleDeleteProduct, verifyAdmin, handleDeleteProduct);
+router.delete("/", handleDeleteProduct, verifyJWT, verifyAdmin, handleDeleteProduct);
 
 module.exports = router;

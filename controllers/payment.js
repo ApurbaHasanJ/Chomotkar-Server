@@ -89,50 +89,78 @@ const handlePostOrder = async (req, res) => {
   //   console.log("tran id", tran_id);
 
   try {
-    const { data } = await axios.post(
-      process.env.bkash_create_payment_url,
-      {
-        mode: "0011",
-        payerReference: order?.phone,
-        callbackURL: "http://localhost:5000/bkash/payment/callback",
-        amount: order?.totalAmount || totalAmount,
-        currency: "BDT",
-        intent: "sale",
-        merchantInvoiceNumber: merchantInvoiceNumber,
-      },
-      {
-        headers: await bkashHeaders(),
-      }
-    );
-    console.log(data);
-    // take data for store in mongoDB
-    const finalOrder = {
-      productId: product?._id,
-      paidStatus: false,
-      orderStatus: "pending",
-      INV: merchantInvoiceNumber,
-      trxID: "",
-      paymentID: "",
-      paymentDate: "",
-      payedAmount: 0,
-      cusName: order?.name,
-      cusPhone: order?.phone,
-      cusEmail: order?.email,
-      cusAdd: order?.address,
-      cusLocation: order?.location,
-      couponCode: couponCode,
-      orderNote: order?.orderNote || "",
-      color: order?.color,
-      size: order?.size,
-      quantity: quantity,
-      totalAmount: totalAmount,
-      paymentMethod: order?.paymentMethod,
-      createdAt: order?.date,
-    };
+    if (order?.paymentMethod === "bkash") {
+      const { data } = await axios.post(
+        process.env.bkash_create_payment_url,
+        {
+          mode: "0011",
+          payerReference: order?.phone,
+          callbackURL:
+            "https://chomotkar-server-iota.vercel.app/bkash/payment/callback",
+          amount: order?.totalAmount || totalAmount,
+          currency: "BDT",
+          intent: "sale",
+          merchantInvoiceNumber: merchantInvoiceNumber,
+        },
+        {
+          headers: await bkashHeaders(),
+        }
+      );
 
-    const result = await orderCollection.insertOne(finalOrder);
-
-    return res.status(200).json({ bkashURL: data.bkashURL });
+      // take data for store in mongoDB
+      const finalOrder = {
+        productId: product?._id,
+        paidStatus: false,
+        orderStatus: "pending",
+        INV: merchantInvoiceNumber,
+        trxID: "",
+        paymentID: data.paymentID || "",
+        paymentDate: "",
+        payedAmount: 0,
+        cusName: order?.name,
+        cusPhone: order?.phone,
+        cusEmail: order?.email,
+        cusAdd: order?.address,
+        cusLocation: order?.location,
+        couponCode: couponCode,
+        orderNote: order?.orderNote || "",
+        color: order?.color,
+        size: order?.size,
+        quantity: quantity,
+        totalAmount: totalAmount,
+        paymentMethod: order?.paymentMethod,
+        createdAt: order?.date,
+      };
+      const result = await orderCollection.insertOne(finalOrder);
+      res.send(data);
+    } else {
+      // take data for store in mongoDB
+      const finalOrder = {
+        productId: product?._id,
+        paidStatus: false,
+        orderStatus: "pending",
+        INV: merchantInvoiceNumber,
+        trxID: "",
+        paymentID: "",
+        paymentDate: "",
+        payedAmount: 0,
+        cusName: order?.name,
+        cusPhone: order?.phone,
+        cusEmail: order?.email,
+        cusAdd: order?.address,
+        cusLocation: order?.location,
+        couponCode: couponCode,
+        orderNote: order?.orderNote || "",
+        color: order?.color,
+        size: order?.size,
+        quantity: quantity,
+        totalAmount: totalAmount,
+        paymentMethod: order?.paymentMethod,
+        createdAt: order?.date,
+      };
+      const result = await orderCollection.insertOne(finalOrder);
+      res.send(result);
+    }
   } catch (error) {
     console.log(error.message);
     return res.status(401).json({ error: error.message });
@@ -146,8 +174,25 @@ const handlePaymentCallback = async (req, res) => {
   console.log(status);
   // In handlePaymentCallback function
   if (status === "cancel" || status === "failure") {
+    console.log("error", req.query);
+
+    // Delete payment info using paymentID
+    try {
+      const deleteResult = await orderCollection.deleteOne({
+        paymentID: paymentID,
+      });
+
+      if (deleteResult.deletedCount > 0) {
+        console.log("Payment info deleted successfully");
+      } else {
+        console.log("No payment info found to delete");
+      }
+    } catch (deleteError) {
+      console.error("Error deleting payment info:", deleteError.message);
+    }
+
     return res.redirect(
-      `http://localhost:5173/payment/error?message=${status}`
+      `https://chomotkarfashion-67485.web.app/payment/error?message=${status}`
     );
   }
 
@@ -163,12 +208,11 @@ const handlePaymentCallback = async (req, res) => {
       if (data && data.statusCode === "0000") {
         console.log("success", data);
         const result = await orderCollection.updateOne(
-          { INV: data.merchantInvoiceNumber },
+          { paymentID: data.paymentID },
           {
             $set: {
               paidStatus: true,
               trxID: data.trxID,
-              paymentID: paymentID,
               paymentDate: data.paymentExecuteTime,
               payedAmount: parseInt(data.amount),
             },
@@ -177,7 +221,7 @@ const handlePaymentCallback = async (req, res) => {
 
         if (result.modifiedCount > 0) {
           return res.redirect(
-            `http://localhost:5173/payment/success/${data.trxID}`
+            `https://chomotkarfashion-67485.web.app/payment/success/${data.trxID}`
           );
         } else {
           throw new Error("Failed to update order status");
@@ -188,25 +232,32 @@ const handlePaymentCallback = async (req, res) => {
     } catch (error) {
       console.error(error.message);
       return res.redirect(
-        `http://localhost:5173/payment/error?message=${error.message}`
+        `https://chomotkarfashion-67485.web.app/payment/error?message=${error.message}`
       );
     }
   }
 };
 
 const handleRefundOrder = async (req, res) => {
-  const { trxID } = req.params;
-  console.log(trxID);
+  const id = req.params;
+  // console.log(id);
+
   try {
-    const findPayment = await orderCollection.findOne({ trxID });
-    console.log(findPayment);
+    const findPayment = await orderCollection.findOne({
+      _id: new ObjectId(id),
+    });
+    // console.log("finf",findPayment);
+
+    if (!findPayment) {
+      return res.status(404).json({ error: "Payment not found" });
+    }
 
     const data = await axios.post(
       process.env.bkash_refund_transaction_url,
       {
         paymentID: findPayment.paymentID,
         amount: findPayment.payedAmount,
-        trxID,
+        trxID: findPayment.trxID,
         sku: "payment",
         reason: "cashback",
       },
@@ -214,14 +265,35 @@ const handleRefundOrder = async (req, res) => {
         headers: await bkashHeaders(),
       }
     );
-    if (data && data.statusCode === "0000") {
-      console.log("success", data);
 
-      return res.status(200).json({ message: "refund successful" });
+    console.log("axios", data.data);
+
+    if (data && data.data.statusCode === "0000") {
+      console.log("going to update");
+      const result = await orderCollection.updateOne(
+        { _id: new ObjectId(id) },
+        {
+          $set: {
+            paidStatus: false,
+            orderStatus: "refund",
+            refundTrxID: data.data.refundTrxID,
+            refundStatus: data.data.transactionStatus,
+            refundTime: data.data.completedTime,
+          },
+        }
+      );
+
+      console.log("Refund success:", result);
+
+      res.send(result);
     } else {
-      return res.status(404).json({ error: "refund failed" });
+      console.error("Refund failed:", data);
+      return res.status(400).json({ error: "Refund failed", details: data });
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
 module.exports = {
