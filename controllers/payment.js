@@ -18,7 +18,7 @@ const bkashHeaders = async () => {
 // post order
 const handlePostOrder = async (req, res) => {
   const order = req.body.data;
-  // console.log(order);
+  console.log(order);
   // console.log("productId",order.productId);
 
   // Finding product from the database
@@ -72,9 +72,11 @@ const handlePostOrder = async (req, res) => {
   // Calculate total amount with discount and shipping charge
   let totalAmount;
   if (location === "insideDhaka") {
-    totalAmount = discountedAmount + shippingCharge.insideDhaka;
+    totalAmount =
+      order?.totalAmount || discountedAmount + shippingCharge.insideDhaka;
   } else {
-    totalAmount = discountedAmount + shippingCharge.outsideDhaka;
+    totalAmount =
+      order?.totalAmount || discountedAmount + shippingCharge.outsideDhaka;
   }
 
   console.log("total", totalAmount);
@@ -100,12 +102,27 @@ const handlePostOrder = async (req, res) => {
           amount: order?.totalAmount || totalAmount,
           currency: "BDT",
           intent: "sale",
-          merchantInvoiceNumber: merchantInvoiceNumber,
+          merchantInvoiceNumber: order?.orderINV || merchantInvoiceNumber,
         },
         {
           headers: await bkashHeaders(),
         }
       );
+
+      if (order?.orderINV && order?.orderId) {
+        console.log(order?.orderINV, order?.orderId);
+        const result = await orderCollection.updateOne(
+          { _id: new ObjectId(order.orderId) },
+          {
+            $set: {
+              paymentID: data.paymentID || "",
+              orderNote: order?.orderNote || "",
+              paymentMethod: order?.paymentMethod,
+            },
+          }
+        );
+        console.log(result);
+      }
 
       // take data for store in mongoDB
       const finalOrder = {
@@ -131,7 +148,9 @@ const handlePostOrder = async (req, res) => {
         paymentMethod: order?.paymentMethod,
         createdAt: order?.date,
       };
-      const result = await orderCollection.insertOne(finalOrder);
+      if (!order?.orderINV) {
+        const result = await orderCollection.insertOne(finalOrder);
+      }
       res.send(data);
     } else {
       // take data for store in mongoDB
