@@ -147,6 +147,7 @@ const handlePostOrder = async (req, res) => {
         totalAmount: totalAmount,
         paymentMethod: order?.paymentMethod,
         createdAt: order?.date,
+        acceding: new Date(),
       };
       if (!order?.orderINV) {
         const result = await orderCollection.insertOne(finalOrder);
@@ -176,6 +177,7 @@ const handlePostOrder = async (req, res) => {
         totalAmount: totalAmount,
         paymentMethod: order?.paymentMethod,
         createdAt: order?.date,
+        acceding: new Date(),
       };
       const result = await orderCollection.insertOne(finalOrder);
       res.send(result);

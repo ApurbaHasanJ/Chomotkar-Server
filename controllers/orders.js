@@ -2,7 +2,7 @@ const { ObjectId } = require("mongodb");
 const orderCollection = require("../models/orders");
 
 const handleGetOrders = async (req, res) => {
-  const order = await orderCollection.find().sort({ createdAt: -1 }).toArray();
+  const order = await orderCollection.find().sort({ acceding: -1 }).toArray();
   //   console.log(order);
   res.send(order);
 };
@@ -21,9 +21,9 @@ const handleOrderStatus = async (req, res) => {
 
 const handleGetUserOrders = async (req, res) => {
   try {
-    // const projection = { createdAt: 1, orderStatus: 1, paidStatus: 1 };
+    // const projection = { acceding: 1, orderStatus: 1, paidStatus: 1 };
 
-    const orders = await orderCollection.find().toArray();
+    const orders = await orderCollection.find().sort({ acceding: -1 }).toArray();
     // console.log(orders);
 
     res.send(orders)
