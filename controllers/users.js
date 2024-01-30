@@ -5,14 +5,14 @@ const usersCollection = require("../models/users");
 const handlePostUsers = async (req, res) => {
   const user = req.body;
 
-  // console.log(user);
+  // // console.log(user);
 
   const query = { email: user.email };
   const existingUser = await usersCollection.findOne(query);
 
   if (existingUser) {
     // User already exists, handle it here (e.g., update user information)
-    // console.log("User already exists:", existingUser);
+    // // console.log("User already exists:", existingUser);
     return res.send({ message: "User already exists" });
   }
 
@@ -73,13 +73,13 @@ const handleGetAdmin = async (req, res) => {
 
 const handleUpdateUserInfo = async (req, res) => {
   const id = req.params.id;
-  console.log(id);
+  // console.log(id);
   const updatedInfo = req.body; // Assuming the body contains the updated fields directly
 
   const query = { _id: new ObjectId(id) };
 
   const result = await usersCollection.updateOne(query, { $set: updatedInfo });
-  console.log(result);
+  // console.log(result);
   res.send(result);
 };
 

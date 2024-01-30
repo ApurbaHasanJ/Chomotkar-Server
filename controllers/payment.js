@@ -18,14 +18,14 @@ const bkashHeaders = async () => {
 // post order
 const handlePostOrder = async (req, res) => {
   const order = req.body.data;
-  console.log(order);
-  // console.log("productId",order.productId);
+  // console.log(order);
+  // // console.log("productId",order.productId);
 
   // Finding product from the database
   const product = await productsCollection.findOne({
     _id: new ObjectId(order.productId),
   });
-  // console.log(product);
+  // // console.log(product);
 
   // Coupon code
   const couponCode = order?.couponCode || "";
@@ -35,7 +35,7 @@ const handlePostOrder = async (req, res) => {
 
   // Product price
   const productPrice = product?.newPrice ? product?.newPrice : product?.price;
-  // console.log("produtctprice", productPrice);
+  // // console.log("produtctprice", productPrice);
 
   // Shipping charges
   const shippingCharge = { insideDhaka: 40, outsideDhaka: 140 };
@@ -53,9 +53,9 @@ const handlePostOrder = async (req, res) => {
       code: couponCode,
     });
     if (couponDiscount) {
-      // console.log("Coupon details:", couponDiscount);
+      // // console.log("Coupon details:", couponDiscount);
       discountPercentage = couponDiscount.discount;
-      // console.log("Discount", discountPercentage);
+      // // console.log("Discount", discountPercentage);
     }
   }
   let discountedAmount;
@@ -67,7 +67,7 @@ const handlePostOrder = async (req, res) => {
     discountedAmount = subAmount;
   }
 
-  // console.log("discountedAmount", discountPercentage);
+  // // console.log("discountedAmount", discountPercentage);
 
   // Calculate total amount with discount and shipping charge
   let totalAmount;
@@ -79,16 +79,16 @@ const handlePostOrder = async (req, res) => {
       order?.totalAmount || discountedAmount + shippingCharge.outsideDhaka;
   }
 
-  console.log("total", totalAmount);
-  // console.log(product?._id);
+  // console.log("total", totalAmount);
+  // // console.log(product?._id);
 
-  // console.log("Subtotal:", subAmount);
-  // console.log("Total Amount:", totalAmount);
+  // // console.log("Subtotal:", subAmount);
+  // // console.log("Total Amount:", totalAmount);
 
   // generate transaction id
   // const tran_id = new ObjectId().toJSON();
   const merchantInvoiceNumber = "INV" + uuidv4().substring(0, 5);
-  //   console.log("tran id", tran_id);
+  //   // console.log("tran id", tran_id);
 
   try {
     if (order?.paymentMethod === "bkash") {
@@ -110,7 +110,7 @@ const handlePostOrder = async (req, res) => {
       );
 
       if (order?.orderINV && order?.orderId) {
-        console.log(order?.orderINV, order?.orderId);
+        // console.log(order?.orderINV, order?.orderId);
         const result = await orderCollection.updateOne(
           { _id: new ObjectId(order.orderId) },
           {
@@ -121,7 +121,7 @@ const handlePostOrder = async (req, res) => {
             },
           }
         );
-        console.log(result);
+        // console.log(result);
       }
 
       // take data for store in mongoDB
@@ -185,19 +185,19 @@ const handlePostOrder = async (req, res) => {
       res.send(result);
     }
   } catch (error) {
-    console.log(error.message);
+    // console.log(error.message);
     return res.status(401).json({ error: error.message });
   }
 };
 
 const handlePaymentCallback = async (req, res) => {
-  console.log("Payment Callback Received:", req.query);
+  // console.log("Payment Callback Received:", req.query);
 
   const { paymentID, status } = req.query;
-  console.log(status);
+  // console.log(status);
   // In handlePaymentCallback function
   if (status === "cancel" || status === "failure") {
-    console.log("error", req.query);
+    // console.log("error", req.query);
 
     // Delete payment info using paymentID
     try {
@@ -206,9 +206,9 @@ const handlePaymentCallback = async (req, res) => {
       });
 
       if (deleteResult.deletedCount > 0) {
-        console.log("Payment info deleted successfully");
+        // console.log("Payment info deleted successfully");
       } else {
-        console.log("No payment info found to delete");
+        // console.log("No payment info found to delete");
       }
     } catch (deleteError) {
       console.error("Error deleting payment info:", deleteError.message);
@@ -229,7 +229,7 @@ const handlePaymentCallback = async (req, res) => {
       );
 
       if (data && data.statusCode === "0000") {
-        console.log("success", data);
+        // console.log("success", data);
         const result = await orderCollection.updateOne(
           { paymentID: data.paymentID },
           {
@@ -263,13 +263,13 @@ const handlePaymentCallback = async (req, res) => {
 
 const handleRefundOrder = async (req, res) => {
   const id = req.params;
-  // console.log(id);
+  // // console.log(id);
 
   try {
     const findPayment = await orderCollection.findOne({
       _id: new ObjectId(id),
     });
-    // console.log("finf",findPayment);
+    // // console.log("finf",findPayment);
 
     if (!findPayment) {
       return res.status(404).json({ error: "Payment not found" });
@@ -289,10 +289,10 @@ const handleRefundOrder = async (req, res) => {
       }
     );
 
-    console.log("axios", data.data);
+    // console.log("axios", data.data);
 
     if (data && data.data.statusCode === "0000") {
-      console.log("going to update");
+      // console.log("going to update");
       const result = await orderCollection.updateOne(
         { _id: new ObjectId(id) },
         {
@@ -306,7 +306,7 @@ const handleRefundOrder = async (req, res) => {
         }
       );
 
-      console.log("Refund success:", result);
+      // console.log("Refund success:", result);
 
       res.send(result);
     } else {

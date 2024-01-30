@@ -14,9 +14,9 @@ const handleGetCouponCode = async (req, res) => {
 
 const handleDeleteCouponCode = async (req, res) => {
   const id = req.params.id;
-  console.log(id);
+  // console.log(id);
   const filter = { _id: new ObjectId(id) };
-  console.log(filter);
+  // console.log(filter);
   const result = await couponsCollection.deleteOne(filter);
   res.send(result);
 };

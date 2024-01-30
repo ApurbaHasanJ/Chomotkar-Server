@@ -19,7 +19,7 @@ const bkashAuth = async (req, res, next) => {
         },
       }
     );
-    // console.log("axios", data);
+    // // console.log("axios", data);
     globals.set("id_token", data.id_token, { protected: true });
     next();
   } catch (error) {

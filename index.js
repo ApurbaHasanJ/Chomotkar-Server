@@ -51,7 +51,7 @@ connectMongoDB()
     app.use("/reviews", reviewCollection);
 
     client.db("admin").command({ ping: 1 });
-    console.log(
+    // console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
 
@@ -66,7 +66,7 @@ connectMongoDB()
 
     // Start the server after setting up routes
     app.listen(port, () => {
-      console.log(`Chomotkar is listening on ${port}`);
+      // console.log(`Chomotkar is listening on ${port}`);
     });
   })
   .catch((err) => {
